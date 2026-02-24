@@ -430,6 +430,15 @@ if (isset($_GET['d'])) {
         
         let progressBar = null;
         let progressText = null;
+        let isUploading = false;
+        
+        function setUploading(uploading) {
+            isUploading = uploading;
+            fileInput.disabled = uploading;
+            dropZone.style.opacity = uploading ? '0.5' : '1';
+            dropZone.style.pointerEvents = uploading ? 'none' : 'auto';
+            dropZone.classList.toggle('uploading', uploading);
+        }
         
         function createProgressUI() {
             if (progressBar) return;
@@ -449,6 +458,7 @@ if (isset($_GET['d'])) {
         }
         
         function uploadFile(file) {
+            setUploading(true);
             createProgressUI();
             
             const formData = new FormData();
@@ -465,6 +475,7 @@ if (isset($_GET['d'])) {
             });
             
             xhr.addEventListener('load', () => {
+                setUploading(false);
                 if (xhr.status === 200) {
                     const response = xhr.responseText;
                     const match = response.match(/\/f\/([a-f0-9-]{36})/);
@@ -485,6 +496,7 @@ if (isset($_GET['d'])) {
             });
             
             xhr.addEventListener('error', () => {
+                setUploading(false);
                 document.getElementById('upload-progress-text').textContent = 'Upload failed';
             });
             
