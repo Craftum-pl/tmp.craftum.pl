@@ -416,6 +416,7 @@ if (isset($_GET['d'])) {
             <p>tmp.craftum.pl - Temporary file sharing service</p>
             <p>Files are automatically deleted after 60 minutes. No guarantees, no encryption.</p>
             <p>Crafted by GLM-5 with lack of love and two forests burnt.</p>
+            <p>See this piece of crap on <a href="https://github.com/Craftum-pl/tmp.craftum.pl" target="_blank">GitHub</a></p>
         </footer>
     </div>
 
