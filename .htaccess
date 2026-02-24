@@ -1,0 +1,19 @@
+RewriteEngine On
+RewriteBase /
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^f/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$ index.php?f=$1 [L,QSA]
+
+RewriteRule ^d/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$ index.php?d=$1 [L,QSA]
+
+<FilesMatch "\.(php|json)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "^(index|cron)\.php$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
