@@ -201,6 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
                 echo "Error: $error_msg\n";
                 exit;
             }
+            http_response_code(429);
             $message = $error_msg;
             $message_type = 'error';
         } else {
@@ -521,6 +522,10 @@ if (isset($_GET['d'])) {
                             progressText = null;
                         }, 1000);
                     }
+                } else if (xhr.status === 429) {
+                    const alertHtml = '<div class="alert alert-error" style="margin-top: 16px;">Rate limit exceeded. Please wait before uploading again.</div>';
+                    dropZone.insertAdjacentHTML('afterend', alertHtml);
+                    document.getElementById('upload-progress-text').textContent = 'Rate limited';
                 } else {
                     document.getElementById('upload-progress-text').textContent = 'Upload failed';
                 }
