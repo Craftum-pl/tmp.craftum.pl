@@ -152,6 +152,19 @@ function is_curl_request(): bool {
     return stripos($ua, 'curl') !== false;
 }
 
+function get_client_ip(): string {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $forwarded = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        if (strpos($forwarded, ',') !== false) {
+            $ip = trim(explode(',', $forwarded)[0]);
+        } else {
+            $ip = $forwarded;
+        }
+    }
+    return $ip;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
     $file = $_FILES['file'];
     
@@ -176,48 +189,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
         $message = $error_msg;
         $message_type = 'error';
     } else {
-        $uuid = generate_uuid();
-        $dir = UPLOAD_DIR . '/' . $uuid;
+        $client_ip = get_client_ip();
         
-        if (mkdir($dir, 0755, true)) {
-            $safe_filename = sanitize_filename($file['name']);
-            $dest = $dir . '/' . $safe_filename;
-            
-            if (move_uploaded_file($file['tmp_name'], $dest)) {
-                $detected_mime = detect_mime_type($dest);
-                $meta = [
-                    'filename' => $safe_filename,
-                    'mime' => $detected_mime,
-                    'created' => time()
-                ];
-                file_put_contents($dir . '/meta.json', json_encode($meta));
-                
-                if (is_curl_request()) {
-                    header('Content-Type: text/plain');
-                    echo base_url() . '/f/' . $uuid . "\n";
-                    exit;
-                }
-                
-                header('Location: /f/' . $uuid);
-                exit;
-            } else {
-                rmdir($dir);
-                if (is_curl_request()) {
-                    header('Content-Type: text/plain');
-                    echo "Error: Failed to save file\n";
-                    exit;
-                }
-                $message = 'Failed to save file';
-                $message_type = 'error';
-            }
-        } else {
+        if (is_rate_limited($client_ip)) {
+            $error_msg = 'Rate limit exceeded. Maximum ' . RATE_LIMIT_MAX_UPLOADS . ' uploads per ' . RATE_LIMIT_WINDOW_SECONDS . ' seconds.';
+        }
+        
+        if ($error_msg) {
             if (is_curl_request()) {
                 header('Content-Type: text/plain');
-                echo "Error: Failed to create upload directory\n";
+                echo "Error: $error_msg\n";
                 exit;
             }
-            $message = 'Failed to create upload directory';
+            $message = $error_msg;
             $message_type = 'error';
+        } else {
+            $uuid = generate_uuid();
+            $dir = UPLOAD_DIR . '/' . $uuid;
+        
+            if (mkdir($dir, 0755, true)) {
+                $safe_filename = sanitize_filename($file['name']);
+                $dest = $dir . '/' . $safe_filename;
+                
+                if (move_uploaded_file($file['tmp_name'], $dest)) {
+                    $detected_mime = detect_mime_type($dest);
+                    $meta = [
+                        'filename' => $safe_filename,
+                        'mime' => $detected_mime,
+                        'created' => time()
+                    ];
+                    file_put_contents($dir . '/meta.json', json_encode($meta));
+                    
+                    record_upload($client_ip);
+                    
+                    if (is_curl_request()) {
+                        header('Content-Type: text/plain');
+                        echo base_url() . '/f/' . $uuid . "\n";
+                        exit;
+                    }
+                    
+                    header('Location: /f/' . $uuid);
+                    exit;
+                } else {
+                    rmdir($dir);
+                    if (is_curl_request()) {
+                        header('Content-Type: text/plain');
+                        echo "Error: Failed to save file\n";
+                        exit;
+                    }
+                    $message = 'Failed to save file';
+                    $message_type = 'error';
+                }
+            } else {
+                if (is_curl_request()) {
+                    header('Content-Type: text/plain');
+                    echo "Error: Failed to create upload directory\n";
+                    exit;
+                }
+                $message = 'Failed to create upload directory';
+                $message_type = 'error';
+            }
         }
     }
 }
