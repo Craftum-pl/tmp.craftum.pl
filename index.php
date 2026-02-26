@@ -108,6 +108,8 @@ function get_file_info(string $uuid): ?array {
     $age = time() - $meta['created'];
     $remaining = max(0, (MAX_AGE_MINUTES * 60) - $age);
     
+    $expires_at = $meta['created'] + (MAX_AGE_MINUTES * 60);
+    
     return [
         'uuid' => $uuid,
         'filename' => $meta['filename'],
@@ -115,6 +117,7 @@ function get_file_info(string $uuid): ?array {
         'mime' => $meta['mime'] ?? 'application/octet-stream',
         'created' => $meta['created'],
         'remaining' => $remaining,
+        'expires_at' => $expires_at,
         'expired' => $remaining <= 0
     ];
 }
@@ -370,9 +373,8 @@ if (isset($_GET['d'])) {
             
             <script>
             (function() {
-                const initialRemaining = <?= $file_info['remaining'] ?>;
+                const expiresAt = <?= $file_info['expires_at'] ?>;
                 const maxSeconds = <?= MAX_AGE_MINUTES * 60 ?>;
-                let remaining = initialRemaining;
                 
                 function formatTime(seconds) {
                     if (seconds < 60) return seconds + 's';
@@ -382,6 +384,8 @@ if (isset($_GET['d'])) {
                 }
                 
                 function update() {
+                    const remaining = Math.max(0, expiresAt - Math.floor(Date.now() / 1000));
+                    
                     if (remaining <= 0) {
                         location.reload();
                         return;
@@ -389,7 +393,6 @@ if (isset($_GET['d'])) {
                     
                     document.getElementById('time-remaining').textContent = formatTime(remaining);
                     document.getElementById('progress-fill').style.width = (remaining / maxSeconds * 100) + '%';
-                    remaining--;
                 }
                 
                 update();
