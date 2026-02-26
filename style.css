@@ -1,5 +1,7 @@
 :root {
     --main-bg: #FFF;
+    --text-color: #000;
+    --link-color: #000;
     --border-color: #000;
     --accent-color: #FEF08A;
     --accent-hover: #FACC15;
@@ -16,7 +18,7 @@
 body {
     font-family: 'Courier New', monospace;
     background: var(--main-bg);
-    color: #000;
+    color: var(--text-color, #000);
     min-height: 100vh;
     padding: 20px;
 }
@@ -115,7 +117,7 @@ h1 {
     text-transform: uppercase;
     cursor: pointer;
     text-decoration: none;
-    color: #000;
+    color: var(--text-color, #000);
     transition: all 0.1s ease;
 }
 
@@ -190,7 +192,7 @@ h1 {
 }
 
 .url-display a {
-    color: #000;
+    color: var(--link-color, #000);
     text-decoration: underline;
 }
 
@@ -282,5 +284,57 @@ footer {
     .btn {
         width: 100%;
         text-align: center;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --main-bg: #1a1a1a;
+        --text-color: #e0e0e0;
+        --link-color: #60A5FA;
+        --border-color: #666;
+        --accent-color: #2563EB;
+        --accent-hover: #3B82F6;
+    }
+
+    .url-display a {
+        color: #93C5FD;
+    }
+
+    .btn-danger {
+        background: #7F1D1D;
+    }
+
+    .btn-danger:hover {
+        background: #991B1B;
+    }
+
+    .btn-success {
+        background: #14532D;
+    }
+
+    .btn-success:hover {
+        background: #166534;
+    }
+
+    .alert-error {
+        background: #7F1D1D;
+    }
+
+    .alert-success {
+        background: #14532D;
+    }
+
+    .card-header {
+        border-bottom-color: #666;
+    }
+
+    .file-info-item {
+        border-bottom-color: #444;
+    }
+
+    pre {
+        background: #0a0a0a !important;
+        color: #4ADE80 !important;
     }
 }
