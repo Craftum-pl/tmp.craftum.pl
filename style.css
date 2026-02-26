@@ -258,6 +258,15 @@ footer {
     opacity: 0.8;
 }
 
+footer a {
+    color: var(--link-color);
+    text-decoration: underline;
+}
+
+footer a:hover {
+    opacity: 0.8;
+}
+
 @media (max-width: 600px) {
     h1 {
         font-size: 1.5rem;
