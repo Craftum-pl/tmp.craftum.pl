@@ -311,6 +311,7 @@ if (isset($_GET['d'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tmp.craftum.pl - Temporary File Sharing</title>
     <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
     <div class="container">
