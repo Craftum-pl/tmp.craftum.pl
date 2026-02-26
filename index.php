@@ -523,6 +523,10 @@ if (isset($_GET['d'])) {
                             progressText = null;
                         }, 1000);
                     }
+                } else if (xhr.status === 413) {
+                    const alertHtml = '<div class="alert alert-error" style="margin-top: 16px;">File too large</div>';
+                    dropZone.insertAdjacentHTML('afterend', alertHtml);
+                    document.getElementById('upload-progress-text').textContent = 'File too large';
                 } else if (xhr.status === 429) {
                     const alertHtml = '<div class="alert alert-error" style="margin-top: 16px;">Rate limit exceeded. Please wait before uploading again.</div>';
                     dropZone.insertAdjacentHTML('afterend', alertHtml);
